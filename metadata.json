@@ -1,0 +1,7 @@
+{
+  "name": "Copy of 化學大師（Chemistry Master）",
+  "description": "一個互動式化學學習應用程式。第一層：離子(Cation/Anion)翻牌配對記憶遊戲與 AI 視覺手寫測試；第二層：練習化學方程式平衡。利用 Gemini AI 生成無限題目。",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

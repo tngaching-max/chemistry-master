@@ -1,0 +1,14 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# 必須有這行，React 應用才能正常運作
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# 設定 Node.js 版本
+[build.environment]
+  NODE_VERSION = "20"
+  GEMINI_API_KEY = "$GEMINI_API_KEY"
