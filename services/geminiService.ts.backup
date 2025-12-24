@@ -3,8 +3,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { Ion, ChemicalEquation, Language, EquationTopic, EquationChallenge } from '../types';
 
 // Initialize Gemini
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.API_KEY;
-const ai = API_KEY ? new GoogleGenAI({ apiKey: API_KEY }) : null;
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 // Using gemini-3-pro-preview for complex visual reasoning like OCR and grading
 const visionModel = 'gemini-3-pro-preview';
@@ -98,11 +97,6 @@ export interface EvaluationResult {
  * 使用 Gemini AI 評估學生手寫的離子或化合物化學式
  */
 export const evaluateHandwrittenAnswers = async (imageBase64: string, questions: {zh: string, en: string, formula: string}[]): Promise<EvaluationResult> => {
-  // 檢查 API_KEY 是否存在
-  if (!ai) {
-    throw new Error('Gemini API 金鑰未設定，請檢查環境變數');
-  }
-
   const prompt = `You are a professional chemistry teacher grading a student's handwritten chemical formula test.
   
   QUESTIONS (Expected answers):
@@ -172,12 +166,6 @@ export const evaluateHandwrittenAnswers = async (imageBase64: string, questions:
 };
 
 export const generateEquations = async (count: number = 3, topic: EquationTopic = 'METALS', language: Language = 'ZH', history: string[] = []): Promise<{ data: ChemicalEquation[], isOffline: boolean }> => {
-  // 檢查 API_KEY 是否存在
-  if (!ai) {
-    console.warn('使用離線模式：API 金鑰未設定');
-    return { data: getFallbackEquations(count, topic, language), isOffline: true };
-  }
-
   const componentSchema = {
     type: Type.OBJECT,
     properties: {
@@ -245,12 +233,6 @@ const getFallbackEquations = (count: number, topic: EquationTopic, language: Lan
 };
 
 export const generateBuilderChallenges = async (count: number = 3, language: Language = 'ZH'): Promise<{ data: EquationChallenge[], isOffline: boolean }> => {
-  // 檢查 API_KEY 是否存在
-  if (!ai) {
-    console.warn('使用離線模式：API 金鑰未設定');
-    return { data: getFallbackBuilderChallenges(count, language), isOffline: true };
-  }
-
   const componentSchema = {
     type: Type.OBJECT,
     properties: {
