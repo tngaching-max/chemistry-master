@@ -76,7 +76,8 @@ export interface GameCard {
 
 export interface EquationComponent {
   formula: string;
-  name?: string;
+  nameZH?: string;
+  nameEN?: string;
   coefficient: number;
 }
 
@@ -95,9 +96,13 @@ export interface EquationChallenge {
 export type QuestionType = 'NAME_TO_FORMULA' | 'FORMULA_TO_NAME';
 
 export type EquationTopic = 
-  | 'METALS' 
-  | 'ACIDS_BASES' 
-  | 'FOSSIL_FUELS' 
-  | 'EQUILIBRIUM' 
-  | 'REDOX_HALF' 
-  | 'REDOX_FULL';
+  | 'TOPIC_1_2_EARTH_MICRO' // 合併課題 1 & 2
+  | 'TOPIC_1_EARTH'        // 地球
+  | 'TOPIC_2_MICRO'        // 微觀世界
+  | 'TOPIC_3_METALS'       // 金屬
+  | 'TOPIC_4_ACIDS'        // 酸鹼鹽
+  | 'TOPIC_6_ORGANIC'      // 有機/化石燃料
+  | 'TOPIC_7_PERIODICITY'  // 週期律
+  | 'TOPIC_8_ENERGETICS'   // 化學能量
+  | 'REDOX_HALF'           // 氧化還原半反應
+  | 'REDOX_FULL';          // 氧化還原全反應

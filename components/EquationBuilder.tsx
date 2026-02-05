@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { generateBuilderChallenges } from '../services/geminiService';
 import { EquationChallenge, Language, EquationComponent } from '../types';
@@ -33,11 +34,13 @@ const EquationBuilder: React.FC<Props> = ({ onBack, language }) => {
 
   const loadData = async () => {
     setLoading(true);
-    const result = await generateBuilderChallenges(5, language);
+    // 總共 6 個課題組（1&2, 3, 4, 6, 7, 8）
+    const result = await generateBuilderChallenges(6, language);
     setChallenges(result.data);
     setIsOffline(result.isOffline);
     setLoading(false);
     if (result.data.length > 0) {
+      setCurrentIndex(0);
       resetInputs();
     }
   };
@@ -189,9 +192,13 @@ const EquationBuilder: React.FC<Props> = ({ onBack, language }) => {
       resetInputs();
     } else {
       loadData();
-      setCurrentIndex(0);
     }
   };
+
+  const topicOrderNames = {
+    ZH: ['課題 1 & 2', '課題 3', '課題 4', '課題 6', '課題 7', '課題 8'],
+    EN: ['Topic 1 & 2', 'Topic 3', 'Topic 4', 'Topic 6', 'Topic 7', 'Topic 8']
+  }[language];
 
   const txt = {
     ZH: {
@@ -212,7 +219,8 @@ const EquationBuilder: React.FC<Props> = ({ onBack, language }) => {
       offline: "離線模式",
       add: "新增",
       inputFormula: "化學式 (如 O2)",
-      inputCoeff: "係數"
+      inputCoeff: "係數",
+      progress: "進度"
     },
     EN: {
       title: "Equation Builder",
@@ -232,7 +240,8 @@ const EquationBuilder: React.FC<Props> = ({ onBack, language }) => {
       offline: "Offline Mode",
       add: "Add",
       inputFormula: "Formula (e.g. O2)",
-      inputCoeff: "Coeff"
+      inputCoeff: "Coeff",
+      progress: "Progress"
     }
   }[language];
 
@@ -319,6 +328,14 @@ const EquationBuilder: React.FC<Props> = ({ onBack, language }) => {
           <svg className="w-6 h-6 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
           Back
         </button>
+        <div className="text-center z-10 hidden md:block">
+           <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">{txt.progress}</div>
+           <div className="flex gap-2">
+             {challenges.map((_, i) => (
+               <div key={i} className={`w-3 h-3 rounded-full ${i === currentIndex ? 'bg-rose-500 scale-125' : i < currentIndex ? 'bg-emerald-400' : 'bg-slate-200'} transition-all`} />
+             ))}
+           </div>
+        </div>
         <div className="text-xl font-bold text-slate-800 z-10">
           {txt.score}: <span className="text-rose-600 text-3xl">{score}</span>
         </div>
@@ -326,7 +343,12 @@ const EquationBuilder: React.FC<Props> = ({ onBack, language }) => {
 
       {/* Description Box */}
       <div className="bg-white p-8 rounded-2xl shadow-md border-l-4 border-rose-500 mb-10">
-        <h3 className="text-slate-400 text-sm font-bold uppercase tracking-widest mb-3">{txt.descLabel}</h3>
+        <div className="flex justify-between items-start mb-3">
+          <h3 className="text-slate-400 text-sm font-bold uppercase tracking-widest">{txt.descLabel}</h3>
+          <span className="bg-rose-50 text-rose-600 px-3 py-1 rounded-lg text-xs font-black uppercase">
+            {topicOrderNames[currentIndex]}
+          </span>
+        </div>
         <p className="text-2xl md:text-3xl font-bold text-slate-800 leading-relaxed">
           {currentChallenge.description}
         </p>

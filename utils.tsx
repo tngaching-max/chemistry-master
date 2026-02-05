@@ -1,63 +1,58 @@
+
 import React from "react";
 
 /**
- * Formats a chemical formula string into JSX with subscripts and superscripts.
- * Expects format like "H2O" or "SO4^2-" or "Fe^3+".
+ * 將化學式字符串轉換為包含下標與上標的 JSX。
+ * 支持 "H2O", "SO4^2-", "Fe^3+", "e^-", "[Cu(NH3)4]^2+" 等格式。
  */
 export const formatFormula = (formula: string): React.ReactNode => {
-  // Check if there is a charge component denoted by ^
+  // 移除對 e^- 的特殊處理，使其進入統一的格式化流程，確保樣式一致
   const parts = formula.split('^');
   const base = parts[0];
   const charge = parts.length > 1 ? parts[1] : null;
 
-  // Format the base (subscripts for numbers)
   const formattedBase = base.split(/(\d+)/).map((part, index) => {
     if (/^\d+$/.test(part)) {
-      return <sub key={`sub-${index}`} className="text-[75%]">{part}</sub>;
+      return <sub key={`sub-${index}`} className="text-[70%] leading-none">{part}</sub>;
     }
     return <span key={`base-${index}`}>{part}</span>;
   });
 
   return (
-    <span className="font-mono font-medium inline-flex items-baseline">
-      <span>{formattedBase}</span>
-      {charge && <sup className="text-[75%] ml-0.5">{charge}</sup>}
+    <span className="font-mono font-medium inline-flex items-center leading-none">
+      <span className="flex items-baseline">
+        {formattedBase}
+      </span>
+      {charge && <sup className="text-[70%] ml-0.5 leading-none">{charge}</sup>}
     </span>
   );
 };
 
 /**
- * Parses a chemical formula into atom counts.
- * Handles parentheses (e.g. Ca(OH)2) and ignores charge/hydrate dots.
- * Supports electrons 'e' as an element for redox logic.
+ * 解析化學式中的原子計數。
+ * 支持括號 (e.g. Ca(OH)2) 與方括號 (e.g. [Zn(OH)4]^2-) 並忽略電荷。
  */
 export const parseFormula = (formula: string): Record<string, number> => {
-  // Remove charge (e.g., ^2+, ^-)
+  if (formula.includes('e^-')) return { 'e': 1 };
+
   let clean = formula.split('^')[0];
-  // Remove hydrate dot (e.g., Fe2O3.H2O -> Fe2O3H2O) - treating as single molecule for counting
-  clean = clean.replace(/\./g, '');
+  clean = clean.replace(/\./g, ''); // 移除結晶水點
 
   const stack: Record<string, number>[] = [{}];
-  
-  // Regex matches:
-  // 1. Element (Start with Upper case letter) OR electron 'e'
-  // 2. Count (optional digits)
-  // 3. (
-  // 4. )
-  // 5. Count after ) (optional digits)
-  const tokenRegex = /([A-Z][a-z]*|e)(\d*)|(\()|(\))(\d*)/g;
+  // 匹配元素、左括號、右括號及其倍數、左方括號、右方括號及其倍數
+  const tokenRegex = /([A-Z][a-z]*|e)(\d*)|(\()|(\))(\d*)|(\[)|(\])(\d*)/g;
   
   let match;
   while ((match = tokenRegex.exec(clean)) !== null) {
-    if (match[1]) { // Element or e
+    if (match[1]) { // 元素
       const element = match[1];
       const count = parseInt(match[2] || '1', 10);
       const current = stack[stack.length - 1];
       current[element] = (current[element] || 0) + count;
-    } else if (match[3]) { // (
+    } else if (match[3] || match[6]) { // ( 或 [
       stack.push({});
-    } else if (match[4]) { // )
-      const multiplier = parseInt(match[5] || '1', 10);
+    } else if (match[4] || match[7]) { // ) 或 ]
+      const multiplier = parseInt((match[5] || match[8]) || '1', 10);
       const popped = stack.pop();
       if (popped) {
         const current = stack[stack.length - 1];
